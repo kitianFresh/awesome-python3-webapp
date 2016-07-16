@@ -30,3 +30,46 @@ def post(path):
 		wrapper.__route__ = path
 		return wrapper
 	return decorator
+
+def add_static(app):
+	'''
+		Add static resources route
+	'''
+	path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
+	app.router.add_static('/static/', path)
+	logging.info('add static %s => %s' % ('/static/', path))
+
+def add_route(app, fn):
+	'''
+		Add dynamic resources route
+	'''
+	method = getattr(fn, '__method__', None)
+	path = getattr(fn, '__route__', None)
+	if path is None or method is None:
+		raise ValueError('@get or @post not defined in %s.' % str(fn))
+	if not asyncio.iscoroutinefunction(fn) and not inspect.isgeneratorfunction(fn):
+		fn = asyncio.coroutine(fn)
+	logging.info('add route %s %s => %s(%s)' % (method, path, fn.__name__, ', '.join(inspect.signature(fn).parameters.keys())))
+	app.router.add_route(method, path, fn)
+	 
+def add_routes(app, module_name):
+	'''
+		Automatically scan routes and add it
+	'''
+	n = module_name.rfind('.')
+	if n == (-1):
+		mod = __import__(module_name, globals(), locals())
+	else:
+		name = module_name[n+1:]
+		mod = getattr(__import__(module_name[:n], globals(), locals(), [name]), name)
+	for attr in dir(mod):
+		if attr.startswith('_'):
+			continue
+		fn = getattr(mod, attr)
+		if callable(fn):
+			method = getattr(fn, '__method__', None)
+			path = getattr(fn, '__route__', None)
+			if method and path:
+				add_route(app, fn)
+
+	'''	
