@@ -6,10 +6,13 @@
 
 import re, time, json, logging, hashlib, base64, asyncio
 
+import markdown2
+#import apis
+from apis import Page, APIError, APIValueError, APIResourceNotFoundError, APIPermissionError
+
 from aiohttp import web
 
 from coroweb import get, post
-from apis import Page, APIValueError, APIResourceNotFoundError
 
 from models import User, Comment, Blog, next_id
 from config import configs
@@ -71,12 +74,12 @@ def cookie2user(cookie_str):
     except Exception as e:
         logging.exception(e)
         return None
-'''
+
 @get('/')
 def index(*, page='1'):
     page_index = get_page_index(page)
     num = yield from Blog.findNumber('count(id)')
-    page = Page(num)
+    page = Page(num, page_index)
     if num == 0:
         blogs = []
     else:
@@ -86,8 +89,8 @@ def index(*, page='1'):
         'page': page,
         'blogs': blogs
     }
-'''
 
+'''
 @get('/')
 def index(request):
 	summary = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
@@ -100,6 +103,7 @@ def index(request):
 		'__template__': 'blogs.html',
 		'blogs': blogs
 	}
+'''
 
 @get('/blog/{id}')
 def get_blog(id):
@@ -107,7 +111,7 @@ def get_blog(id):
     comments = yield from Comment.findAll('blog_id=?', [id], orderBy='created_at desc')
     for c in comments:
         c.html_content = text2html(c.content)
-    blog.html_content = markdown2.markdown(blog.content)
+    blog.content = markdown2.markdown(blog.content)
     return {
         '__template__': 'blog.html',
         'blog': blog,
@@ -161,7 +165,7 @@ def signout(request):
 
 @get('/manage/')
 def manage():
-    return 'redirect:/manage/comments'
+    return 'redirect:/manage/blogs'
 
 @get('/manage/comments')
 def manage_comments(*, page='1'):
@@ -232,7 +236,7 @@ def api_delete_comments(id, request):
         raise APIResourceNotFoundError('Comment')
     yield from c.remove()
     return dict(id=id)
-'''
+
 @get('/api/users')
 def api_get_users(*, page='1'):
     page_index = get_page_index(page)
@@ -244,17 +248,9 @@ def api_get_users(*, page='1'):
     for u in users:
         u.password = '******'
     return dict(page=p, users=users)
-'''
 
 _RE_EMAIL = re.compile(r'^[a-z0-9\.\-\_]+\@[a-z0-9\-\_]+(\.[a-z0-9\-\_]+){1,4}$')
 _RE_SHA1 = re.compile(r'^[0-9a-f]{40}$')
-
-@get('/api/users')
-def api_get_users():
-	users = yield from User.findAll(orderBy='created_at desc')
-	for u in users:
-		u.password = '******'
-	return dict(users=users)
 
 @post('/api/users')
 def api_register_user(*, email, name, password):
