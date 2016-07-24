@@ -90,11 +90,15 @@ def index(*, page='1'):
 
 @get('/')
 def index(request):
-	users = yield from User.findAll()
-	print(users)
+	summary = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+	blogs = [
+		Blog(id='1', name='Test Blog', summary=summary, created_at=time.time()-120),
+		Blog(id='2', name='Something New', summary=summary, created_at=time.time()-3600),
+		Blog(id='3', name='Learn Swift', summary=summary, created_at=time.time()-7200)
+	]
 	return {
-		'__template__': 'test.html',
-		'users': users
+		'__template__': 'blogs.html',
+		'blogs': blogs
 	}
 
 @get('/blog/{id}')
@@ -141,7 +145,7 @@ def authenticate(*, email, password):
         raise APIValueError('password', 'Invalid password.')
     # authenticate ok, set cookie:
     r = web.Response()
-    r.set_cookie(COOKIE_NAME, user2cookie(user, 86400), max_age=86400, httponly=True)
+    r.set_cookie(COOKIE_NAME, user2cookie(user, 300), max_age=300, httponly=True)
     user.password = '******'
     r.content_type = 'application/json'
     r.body = json.dumps(user, ensure_ascii=False).encode('utf-8')
@@ -228,7 +232,7 @@ def api_delete_comments(id, request):
         raise APIResourceNotFoundError('Comment')
     yield from c.remove()
     return dict(id=id)
-
+'''
 @get('/api/users')
 def api_get_users(*, page='1'):
     page_index = get_page_index(page)
@@ -240,9 +244,17 @@ def api_get_users(*, page='1'):
     for u in users:
         u.password = '******'
     return dict(page=p, users=users)
+'''
 
 _RE_EMAIL = re.compile(r'^[a-z0-9\.\-\_]+\@[a-z0-9\-\_]+(\.[a-z0-9\-\_]+){1,4}$')
 _RE_SHA1 = re.compile(r'^[0-9a-f]{40}$')
+
+@get('/api/users')
+def api_get_users():
+	users = yield from User.findAll(orderBy='created_at desc')
+	for u in users:
+		u.password = '******'
+	return dict(users=users)
 
 @post('/api/users')
 def api_register_user(*, email, name, password):
@@ -261,7 +273,7 @@ def api_register_user(*, email, name, password):
     yield from user.save()
     # make session cookie:
     r = web.Response()
-    r.set_cookie(COOKIE_NAME, user2cookie(user, 86400), max_age=86400, httponly=True)
+    r.set_cookie(COOKIE_NAME, user2cookie(user, 300), max_age=300, httponly=True)
     user.password = '******'
     r.content_type = 'application/json'
     r.body = json.dumps(user, ensure_ascii=False).encode('utf-8')
