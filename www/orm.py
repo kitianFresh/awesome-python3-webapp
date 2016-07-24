@@ -69,7 +69,7 @@ class Field(object):
 		self.default = default
 	
 	def __str__(self):
-		return '<%s, %s:%s>' % (self.__class__.__name__, self.column_type, self.name)
+		return '<%s, %s:%s:%s:%s>' % (self.__class__.__name__, self.name, self.column_type, self.primary_key, str(self.default))
 
 class StringField(Field):
 
@@ -237,7 +237,7 @@ class Model(dict, metaclass=ModelMetaclass):
 	@asyncio.coroutine
 	def update(self):
 		args = list(map(self.getValue, self.__fields__))
-		args.append(self.getValue(__primary_key__))
+		args.append(self.getValue(self.__primary_key__))
 		rows = yield from execute(self.__update__, args)
 		if rows != 1:
 			logging.warn('failed to update by primary key: affected rows: %s' % rows)
