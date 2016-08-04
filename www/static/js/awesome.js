@@ -118,22 +118,18 @@ function parseQueryString() {
     return r;
 }
 
-function gotoPage(i) {
-    var r = parseQueryString();
-    r.page = i;
-    location.assign('?' + $.param(r));
-}
-
 function refresh() {
     var
         t = new Date().getTime(),
         url = location.pathname;
+        console.log(url);
     if (location.search) {
         url = url + location.search + '&t=' + t;
     }
     else {
         url = url + '?t=' + t;
     }
+    console.log(url);
     location.assign(url);
 }
 
@@ -348,6 +344,18 @@ function postJSON(url, data, callback) {
 }
 
 // extends Vue:
+/*function gotoPage(i) {
+        var r = parseQueryString();
+        r.page = i;
+        console.log(r);
+        location.assign('?' + $.param(r));
+}*/
+
+/*
+vue.js 中的模板不能直接调用global functions，所以直接调用gotoPage是不可行的（会出现scope.gotoPage undefined error）；
+templates只能调用本作用域scope内的函数；这里我改写了global gotoPage，以前的时直接重新请求url得到新的页面，
+但是分页过程中只是改变了数据，并不改变视图，为了充分利用mvvm，所以我采用getJson直接获取数据后自动引发view的更改；，而不是请求新的页面；
+*/
 
 if (typeof(Vue)!=='undefined') {
     Vue.filter('datetime', function (value) {
@@ -357,14 +365,20 @@ if (typeof(Vue)!=='undefined') {
         }
         return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes();
     });
-    Vue.component('pagination', {
+    Vue.component('v-pagination', {
+        props: ['page'],
         template: '<ul class="uk-pagination">' +
-                '<li v-if="! has_previous" class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>' +
-                '<li v-if="has_previous"><a v-attr="onclick:\'gotoPage(\' + (page_index-1) + \')\'" href="#0"><i class="uk-icon-angle-double-left"></i></a></li>' +
-                '<li class="uk-active"><span v-text="page_index"></span></li>' +
-                '<li v-if="! has_next" class="uk-disabled"><span><i class="uk-icon-angle-double-right"></i></span></li>' +
-                '<li v-if="has_next"><a v-attr="onclick:\'gotoPage(\' + (page_index+1) + \')\'" href="#0"><i class="uk-icon-angle-double-right"></i></a></li>' +
-            '</ul>'
+                '<li v-if="!page.has_previous" class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>' +
+                '<li v-if="page.has_previous"><a v-on:click="gotoPage((page.page_index-1))"><i class="uk-icon-angle-double-left"></i></a></li>' +
+                '<li class="uk-active"><span v-text="page.page_index"></span></li>' +
+                '<li v-if="!page.has_next" class="uk-disabled"><span><i class="uk-icon-angle-double-right"></i></span></li>' +
+                '<li v-if="page.has_next"><a v-on:click="gotoPage((page.page_index+1))"><i class="uk-icon-angle-double-right"></i></a></li>' +
+            '</ul>',
+        methods: {
+            gotoPage: function (index) {
+                this.$dispatch('gotoPage', index);    
+            }
+        }
     });
 }
 
