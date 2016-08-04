@@ -1,10 +1,21 @@
 {% extends '__base__.html' %}
 
-{% block title %}评论{% endblock %}
+{% block title %}评论管理{% endblock %}
 
 {% block beforehead %}
 
 <script>
+/*
+这里使用了v-pagination组件。由于组件需要获得父组件的page数据，因此需要props和v-bind完成；
+另外，子组件需要更改父组件的数据page和comments，但是vue.js规定子组件最好不要直接更改父组件的数据，
+Although it’s possible to access any instance in the parent chain, you should avoid directly relying on parent data in a child component and prefer passing data down explicitly using props. In addition, it is a very bad idea to mutate parent state from a child component, because:
+
+It makes the parent and child tightly coupled;
+
+It makes the parent state much harder to reason about when looking at it alone, because its state may be modified by any child! Ideally, only a component itself should be allowed to modify its own state.
+
+因此，选择使用event dispatch来做。
+*/
 function initVM(data) {
     $('#vm').show();
     var vm = new Vue({
@@ -25,9 +36,27 @@ function initVM(data) {
                     });
                 }
             }
+        },
+        events: {
+            gotoPage: function (index) {
+                getJSON('/api/comments', {
+                    page: index
+                }, function (err, results) {
+                    if (err) {
+                        return fatal(err);
+                    }
+                    $('#loading').hide();
+                    vm.comments = results.comments;
+                    vm.page = results.page;
+                });
+            }
         }
+
     });
 }
+/* 这里的{{ page_index }}实际上是由服务器端通过jinjia2渲染成具体数值（实际是默认值1，首次请求没有参数page_index,使用api_blogs(*, page='1')的默认值），
+然后返回给客户端，客户端浏览器运行此段js代码获取页码为page_index这一页的数据results；最后vue.js框架再实现mvvm模型，后续的请求下一页就会有真实的参数了。
+*/
 $(function() {
     getJSON('/api/comments', {
         page: {{ page_index }}
@@ -89,6 +118,7 @@ $(function() {
                 </tr>
             </tbody>
         </table>
-        <div v-component="pagination" v-with="page"></div>
+
+        <v-pagination v-bind:page="page"></v-pagination>
     </div>
 {% endblock %}
