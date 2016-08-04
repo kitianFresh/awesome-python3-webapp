@@ -353,7 +353,7 @@ function postJSON(url, data, callback) {
 
 /*
 vue.js 中的模板不能直接调用global functions，所以直接调用gotoPage是不可行的（会出现scope.gotoPage undefined error）；
-templates只能调用本作用域scope内的函数；这里我改写了global gotoPage，以前的时直接重新请求url得到新的页面，
+templates只能调用本作用域scope内的函数；这里我改写了global gotoPage，以前是直接重新请求url得到新的页面，
 但是分页过程中只是改变了数据，并不改变视图，为了充分利用mvvm，所以我采用getJson直接获取数据后自动引发view的更改；，而不是请求新的页面；
 */
 
