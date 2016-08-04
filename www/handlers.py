@@ -79,14 +79,14 @@ def cookie2user(cookie_str):
 def index(*, page='1'):
     page_index = get_page_index(page)
     num = yield from Blog.findNumber('count(id)')
-    page = Page(num, page_index)
+    p = Page(num, page_index)
     if num == 0:
         blogs = []
     else:
-        blogs = yield from Blog.findAll(orderBy='created_at desc', limit=(page.offset, page.limit))
+        blogs = yield from Blog.findAll(orderBy='created_at desc', limit=(p.offset, p.limit))
     return {
         '__template__': 'blogs.html',
-        'page': page,
+        'page': p,
         'blogs': blogs
     }
 
@@ -149,7 +149,7 @@ def authenticate(*, email, password):
         raise APIValueError('password', 'Invalid password.')
     # authenticate ok, set cookie:
     r = web.Response()
-    r.set_cookie(COOKIE_NAME, user2cookie(user, 300), max_age=300, httponly=True)
+    r.set_cookie(COOKIE_NAME, user2cookie(user, 86400), max_age=86400, httponly=True)
     user.password = '******'
     r.content_type = 'application/json'
     r.body = json.dumps(user, ensure_ascii=False).encode('utf-8')
@@ -169,50 +169,50 @@ def manage():
 
 @get('/manage/comments')
 def manage_comments(*, page='1'):
-    return {
-        '__template__': 'manage_comments.html',
-        'page_index': get_page_index(page)
+	return {
+		'__template__': 'manage_comments.html',
+		'page_index': get_page_index(page)
     }
 
 @get('/manage/blogs')
 def manage_blogs(*, page='1'):
-    return {
-        '__template__': 'manage_blogs.html',
-        'page_index': get_page_index(page)
-    }
+	return {
+		'__template__': 'manage_blogs.html',
+		'page_index': get_page_index(page)
+	}
 
 @get('/manage/blogs/create')
 def manage_create_blog():
-    return {
-        '__template__': 'manage_blog_edit.html',
-        'id': '',
-        'action': '/api/blogs'
-    }
+	return {
+		'__template__': 'manage_blog_edit.html',
+		'id': '',
+		'action': '/api/blogs'
+	}
 
 @get('/manage/blogs/edit')
 def manage_edit_blog(*, id):
-    return {
-        '__template__': 'manage_blog_edit.html',
-        'id': id,
-        'action': '/api/blogs/%s' % id
-    }
+	return {
+		'__template__': 'manage_blog_edit.html',
+		'id': id,
+		'action': '/api/blogs/%s' % id
+	}
 
 @get('/manage/users')
 def manage_users(*, page='1'):
-    return {
-        '__template__': 'manage_users.html',
-        'page_index': get_page_index(page)
-    }
+	return {
+		'__template__': 'manage_users.html',
+		'page_index': get_page_index(page)
+	}
 
 @get('/api/comments')
 def api_comments(*, page='1'):
-    page_index = get_page_index(page)
-    num = yield from Comment.findNumber('count(id)')
-    p = Page(num, page_index)
-    if num == 0:
-        return dict(page=p, comments=())
-    comments = yield from Comment.findAll(orderBy='created_at desc', limit=(p.offset, p.limit))
-    return dict(page=p, comments=comments)
+	page_index = get_page_index(page)
+	num = yield from Comment.findNumber('count(id)')
+	p = Page(num, page_index)
+	if num == 0:
+		return dict(page=p, comments=())
+	comments = yield from Comment.findAll(orderBy='created_at desc', limit=(p.offset, p.limit))
+	return dict(page=p, comments=comments)
 
 @post('/api/blogs/{id}/comments')
 def api_create_comment(id, request, *, content):
@@ -269,7 +269,7 @@ def api_register_user(*, email, name, password):
     yield from user.save()
     # make session cookie:
     r = web.Response()
-    r.set_cookie(COOKIE_NAME, user2cookie(user, 300), max_age=300, httponly=True)
+    r.set_cookie(COOKIE_NAME, user2cookie(user, 86400), max_age=86400, httponly=True)
     user.password = '******'
     r.content_type = 'application/json'
     r.body = json.dumps(user, ensure_ascii=False).encode('utf-8')
