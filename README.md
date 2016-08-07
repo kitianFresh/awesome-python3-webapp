@@ -21,7 +21,7 @@ a web blog by python3 following [liaoxuefeng](http://www.liaoxuefeng.com)
      - ***vue.js 中的模板不能直接调用global functions***，所以直接调用gotoPage是不可行的(会出现scope.gotoPage undefined error);templates只能调用本作用域scope内的函数；
 	 - 这里我改写了global gotoPage，以前是直接重新请求url得到新的页面(location.assign())，但是分页过程中只是改变了数据，并不改变视图，为了充分利用mvvm，所以我***采用getJson直接获取数据后自动引发view的更改***,而不是请求新的页面;
 	 - 由于组件需要获得父组件的page数据，因此需要props和v-bind完成；另外，子组件需要更改父组件的数据page和comments，但是vue.js规定子组件最好不要直接更改父组件的数据;因此，选择使用event dispatch来做;
-  - 在blogs.html页面中使用的是***服务端jinjia2模板的宏渲染***实现的分页,但这也是每次需要请求***新的页面***(因为渲染在后端进行，即对每一页的请求实际上是由服务端获取数据后并渲染完成最后的页面，直接展示给用户)而***不是新的数据***（即由前端vue.js来完成渲染视图更新）;
+   - 在blogs.html页面中使用的是***服务端jinjia2模板的宏渲染***实现的分页,但这也是每次需要请求***新的页面***(因为渲染在后端进行，即对每一页的请求实际上是由服务端获取数据后并渲染完成最后的页面，直接展示给用户)而***不是新的数据***（即由前端vue.js来完成渲染视图更新）;
 
   3. mvvm中的模板类似于前端渲染，***mvvm数据驱动***;而jinjia2是后端模板渲染,计算主要由服务端进行;
 
