@@ -25,3 +25,7 @@ a web blog by python3 following [liaoxuefeng](http://www.liaoxuefeng.com)
 
   3. mvvm中的模板类似于前端渲染，***mvvm数据驱动***;而jinjia2是后端模板渲染,计算主要由服务端进行;
 
+### python-markdown2 pygments pygments-css
+  1. 采用markdown语法编辑博客，存入数据库的时纯markdown文本内容;
+  2. 展示博客的时候需要将markdown文本转换成html，这里采用的是在后端用[python-markdown2](https://github.com/trentm/python-markdown2)进行转换，然后返回给前端;
+  3. [pygments](http://pygments.org/),python3需要手动安装, [pygments-css](https://github.com/richleland/pygments-css)用来实现代码块语法高亮;
