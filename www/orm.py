@@ -84,8 +84,8 @@ class BooleanField(Field):
 
 class IntegerField(Field):
 
-	def __init__(self, name=None, primary_key=False, default=0):
-		super().__init__(name, 'bigint', primary_key, default)
+	def __init__(self, name=None, primary_key=False, default=0, ddl='int(11)'):
+		super().__init__(name, ddl, primary_key, default)
 
 class FloatField(Field):
 
