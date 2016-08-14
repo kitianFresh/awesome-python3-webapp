@@ -106,12 +106,18 @@ def index(request):
 '''
 
 @get('/blog/{id}')
-def get_blog(id):
+def get_blog(id, request):
     blog = yield from Blog.find(id)
+    # 如果不是管理员访问，则访问计数加1
+    try:
+        check_admin(request)
+    except APIPermissionError as e:
+        blog.viewed_count += 1
+        yield from blog.update()
     comments = yield from Comment.findAll('blog_id=?', [id], orderBy='created_at desc')
     for c in comments:
-        c.html_content = text2html(c.content)
-    blog.content = markdown2.markdown(blog.content)
+        c.content = text2html(c.content)
+    blog.content = markdown2.markdown(blog.content,extras=["fenced-code-blocks", "tables", "wiki-tables", "cuddled-lists"])
     return {
         '__template__': 'blog.html',
         'blog': blog,
@@ -286,8 +292,14 @@ def api_blogs(*, page='1'):
     return dict(page=p, blogs=blogs)
 
 @get('/api/blogs/{id}')
-def api_get_blog(*, id):
+def api_get_blog(request, *, id):
     blog = yield from Blog.find(id)
+    # 如果不是管理员访问，则访问计数加1
+    try:
+        check_admin(request)
+    except APIPermissionError as e:
+        blog.viewed_count += 1
+        yield from blog.update()
     return blog
 
 @post('/api/blogs')
