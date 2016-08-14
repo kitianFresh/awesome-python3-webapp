@@ -25,7 +25,15 @@ a web blog by python3 following [liaoxuefeng](http://www.liaoxuefeng.com)
 
   3. mvvm中的模板类似于前端渲染，***mvvm数据驱动***;而jinjia2是后端模板渲染,计算主要由服务端进行;
 
-### python-markdown2 pygments pygments-css
+### 后端markdown语法解析模块python-markdown2 以及相应的代码块渲染风格模块pygments pygments-css
   1. 采用markdown语法编辑博客，存入数据库的时纯markdown文本内容;
   2. 展示博客的时候需要将markdown文本转换成html，这里采用的是在后端用[python-markdown2](https://github.com/trentm/python-markdown2)进行转换，然后返回给前端;
   3. [pygments](http://pygments.org/),python3需要手动安装, [pygments-css](https://github.com/richleland/pygments-css)用来实现代码块语法高亮;
+
+### 前端markdown语法解析模块marked.js和前端代码渲染模块highlight.js
+  1. 增加了前端markdown语法解析器marked.js,他可以被vue.js当做过滤器来使用;
+  2. 这里主要是当我编辑一篇博客的时候，希望可以在前端manage\_blog\_edit.html有WYSIWYG所见即所得的markdown编辑器;
+  3. 在后端，我使用的是python-markdown2来转换markdown文本为html并返回给前端;
+  4. 所以本博客混合使用了前端markdown和后端markdown，其实可以统一放到前端或者后端处理markdown语法，但是个人觉得统一放到前端更合适;
+  5. 我在使用highlight.js检测pre code标签的时候使用了setInterval，原因是如果在一开始就直接调用一次hljs.highlightBlock(block);将无法渲染代码块，因为这个时候blog.html的代码块部分可能还没有加载过来，所以暂时只能间断性的轮询检测;
+  6. 对于manage\_blog\_edit.html就必须使用setInterval轮询检测pre code标签了，因为在编写博客时，无法知道什么时候markdown中出现代码部分，除非修改marked.js,当用户输入代码时，触发hljs.highlightBlock(block)的调用;
