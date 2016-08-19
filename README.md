@@ -4,6 +4,35 @@ a web blog by python3 following [liaoxuefeng](http://www.liaoxuefeng.com)
 ## 笔记
 
 ### ORM知识点
+#### orm的来源问题
+  1. object-relation mapping,对象和关系的映射，从名字就可以看出是一个对象和一个关系数据库的记录的映射;
+  2. 以JAVA为例，记得一开始编写程序的时候，连接数据库就是使用jdbc，然后做数据库操作，查找数据，比如查一个Student的信息，完了之后又将这条查询结果新建一个Student对象供程序使用，自己不停的需要写SQL语句。当更换对象比如Teacher时，又得重新写SQL，新建Teacher实例，如果要写回数据库，又得拿到对象的属性放入SQL语句中。并且当数据库表发生变化时，修改数据库操作代码也很麻烦;一个类和数据库表格没有很好的分离;下面这个Java代码:
+```java
+public User[] getUserInfoById(String id){
+	try{
+			String userid = (String)getProperty("login");
+			if(userid == null){
+				return null;
+			}
+			execSQL("select * from user where uid like ?","%"+id+"%");
+			List<User> userlist = new ArrayList<User>();
+			while(rs.next()){
+				User user = new User();
+				user.setUid(rs.getString("uid"));
+				user.setPassword(rs.getString("password"));
+				userlist.add(user);
+																																		}
+			User[] users = new User[userlist.size()];
+			return userlist.toArray(users);
+		}catch(Exception e){
+			return null;
+		}
+}
+  ```
+  3. 如果用面向对象的思维就是，一个对象对数据库的增删该查可以直接作为这个对象的行为属性，而这个类还可以提供save，delete，update，find等数据库操作函数，并且程序员不用自己写过多SQL语句,直接传入相应的参数和条件即可。要想这个底层框架具有通用性，就必须可以在不知道类有哪些属性的情况下也可以使用，因为数据库和业务只有上层程序员知道，而这个框架本身不能知道有哪些字段和属性，必须自己扫描所有的字段和属性，然后形成映射关系，重新构造出一个新的类。当数据库表格发生变化(比如需求变更，增加一个字段),只需要修改对象定义，而不需要修改其他任何代码，代码也很容易维护。这里就涉及动态创造一个类的技术，Python使用了元类，Java中应该要使用反射机制来做ORM框架。
+  4. 其实关系型数据库中实体entity的概念，直接对应的是OOP中类的概念，一个关系又对应了类和类之间的关系，一张表的一条记录对应了一个类实例即对象，对象对数据库的操作能抽象成相同的增删改查，底层封装SQL，上层提供一个和对象一样操作的接口即可。
+  5. 目前对ORM的理解暂时到这里，后续希望能用java的reflection实现一个简单ORM。再做详细讨论;
+#### python 中元类来动态生成一个类
   1. 这里的Model实际上是一个词典，用于存储用户实例化的对象键值对，也就是每一个字段的实际值；
   2. 同时，他还存储了字段名字和数据库域的映射关系在\_\_mappings\_\_中，比如name---name，前者是string，后者是StringField类型，后者具有数据库列的属性，比如名字，类型，默认值，是否主键。
 
