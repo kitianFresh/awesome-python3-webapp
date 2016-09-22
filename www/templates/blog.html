@@ -46,6 +46,21 @@ window.setInterval(function(){
     }  
 }, 1000);
 
+
+var viewedcountWs = new WebSocket("ws://localhost:8000/websocket/viewed_count");
+viewedcountWs.onopen = function (event) {
+};
+viewedcountWs.onerror = function (event) {
+  console.log(event.data);
+};
+viewedcountWs.onmessage = function(event) {
+    var viewspan = $('div.uk-article-meta span.uk-margin-right');
+    var msg = JSON.parse(event.data);
+    if (msg.type === "viewed_count") {
+        viewspan.innerText = "阅读量： " + msg.viewed_count;
+    }
+};
+
 </script>
 
 {% endblock %}

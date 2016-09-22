@@ -8,16 +8,12 @@
 /*
 为了比较不同的分页方法，
 在manage_comments.html中使用自定义组件v-pagination，采用props和events dispatch实现父子组件的通讯问题（http://vuejs.org/guide/components.html#Custom_Events）；
-
 在manage_blogs.html中并未使用自定义的组件v-pagination，而是直接写了个和vm同级的元素；这样就不必进行父子组件的通讯任务了；但是会编写重复的代码；
-
 在blogs.html页面中使用的是服务端jinjia2模板的宏渲染实现的分页；
-
 也就是说mvvm中的模板类似于前端渲染，而jinjia2是后端模板渲染；
 */
-
 function initVM(results) {
-	var vm = new Vue({
+    var vm = new Vue({
         el: '#vm',
         data: {
             blogs: results.blogs,
@@ -66,8 +62,6 @@ $(function() {
         initVM(results);
     });
 });
-
-
 </script>
 
 {% endblock %}
@@ -131,5 +125,5 @@ $(function() {
             <li v-if="!page.has_next" class="uk-disabled"><span><i class="uk-icon-angle-double-right"></i></span></li>
             <li v-if="page.has_next"><a v-on:click="gotoPage((page.page_index+1))"><i class="uk-icon-angle-double-right"></i></a></li>
         </ul>
-	</div>
+    </div>
 {% endblock%}
