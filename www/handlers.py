@@ -74,6 +74,23 @@ def cookie2user(cookie_str):
     except Exception as e:
         logging.exception(e)
         return None
+'''
+@get('/websocket/viewed_count')
+def websocket_handler(request):
+    ws = web.WebSocketResponse()
+    yield from ws.prepare(request)
+   
+    for msg in ws:
+        if msg.type == aiohttp.MsgType.text:
+            if msg.data == 'close':
+                yield from ws.close()
+            else:
+                msg.data = Blog(id='1', name='Test Blog', summary=summary, created_at=time.time()-120, viewed_count=30)
+                ws.send_str(msg.data)
+        elif msg.type == aiohttp.MsgType.error:
+            print('ws connection closed with exception %s' % ws.exception())
+    return ws
+'''
 
 @get('/')
 def index(*, page='1'):
