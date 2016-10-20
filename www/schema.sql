@@ -30,6 +30,7 @@ create table blogs (
     `summary` varchar(200) not null,
     `content` mediumtext not null,
     `created_at` real not null,
+    `viewed_count` int not null default 0,
     key `idx_created_at` (`created_at`),
     primary key (`id`)
 ) engine=innodb default charset=utf8;
